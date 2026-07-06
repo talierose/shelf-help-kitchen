@@ -268,6 +268,7 @@
         <option value="30" selected>Last 30 days</option>
         <option value="90">Last 90 days</option>
         <option value="365">Last year</option>
+        <option value="all">All time</option>
       </select>
     </div>
     <div id="stats-container"></div>
@@ -577,10 +578,13 @@ function renderChooseChips() {
 async function renderStats() {
   const el = document.getElementById('stats-container');
   el.innerHTML = `<div class="empty"><p>Loading…</p></div>`;
-  const days = parseInt(document.getElementById('stats-period').value, 10);
-  const since = new Date(Date.now() - days * 86400000).toISOString();
-  const { data, error } = await sb.from('kitchen_events').select('*')
-    .gte('created_at', since).order('created_at', { ascending: false });
+  const period = document.getElementById('stats-period').value;
+  let query = sb.from('kitchen_events').select('*').order('created_at', { ascending: false });
+  if (period !== 'all') {
+    const since = new Date(Date.now() - parseInt(period, 10) * 86400000).toISOString();
+    query = query.gte('created_at', since);
+  }
+  const { data, error } = await query;
   if (error) { el.innerHTML = `<div class="empty"><p>${esc(error.message)}</p></div>`; return; }
   if (!data.length) {
     el.innerHTML = `<div class="empty"><div class="big">📊</div><p>No history in this period yet. Eat something! (Or bin something, but hopefully not.)</p></div>`;
