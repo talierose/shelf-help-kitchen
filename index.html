@@ -304,13 +304,14 @@ async function sendLoginLink() {
 async function signOut() { await sb.auth.signOut(); }
 
 function setUser(u) {
+  const wasSignedIn = !!user;
   user = u;
   const bar = document.getElementById('signed-in-bar');
   document.getElementById('nav').style.display = u ? 'flex' : 'none';
   bar.style.display = u ? 'block' : 'none';
   if (u) {
     bar.innerHTML = `${esc(u.email)} · <button onclick="signOut()">sign out</button>`;
-    showScreen('pantry');
+    if (!wasSignedIn) showScreen('choose');   // land on "What should I eat?" — but don't yank her there on token refreshes
   } else {
     showScreen('login');
   }
